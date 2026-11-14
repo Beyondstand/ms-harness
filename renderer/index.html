@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:" />
+  <title>MS Harness</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 无框标题栏（可拖拽） -->
+  <header id="titlebar">
+    <div class="tb-left">
+      <span class="tb-icon">■</span>
+      <span class="tb-name">ms-harness</span>
+      <span class="tb-sep">/</span>
+      <span class="tb-view" id="tb-view">console</span>
+    </div>
+    <div class="tb-right">
+      <span class="svc-chip" id="svc-chip"><span class="dot"></span><span id="svc-chip-text">服务检测中</span></span>
+      <button id="tb-action" class="tb-btn primary no-drag">🚀 打开 Material Studio</button>
+      <button class="tb-btn no-drag" id="tb-min" title="最小化">—</button>
+      <button class="tb-btn no-drag" id="tb-max" title="最大化/还原">□</button>
+      <button class="tb-btn close no-drag" id="tb-close" title="关闭">✕</button>
+    </div>
+  </header>
+
+  <div id="app">
+    <!-- 侧栏导航 -->
+    <aside id="sidebar">
+      <div class="sec">运行</div>
+      <div class="nav active" data-view="console">▣ 服务终端 <span class="nav-dot hidden" id="nav-dot-svc"></span></div>
+      <div class="nav" data-view="harness">💬 对话工作台 <span id="nav-lock" title="检测到 Materials Studio 启动后解锁">🔒</span></div>
+
+      <div class="sec">系统</div>
+      <div class="nav" data-view="modelcfg">⚙ 模型配置</div>
+
+      <div class="sec">会话</div>
+      <div id="sessions" class="list"></div>
+
+      <div class="sec">任务目录</div>
+      <div id="taskdirs" class="list"></div>
+
+      <div class="spacer"></div>
+      <div class="filterbox"><input id="term-filter" placeholder="过滤日志…" spellcheck="false" /></div>
+    </aside>
+
+    <main id="main">
+      <!-- ============ 视图 1：控制台（服务终端） ============ -->
+      <section id="view-console" class="view">
+        <div class="panel-head">
+          <div class="ph-title">▣ MS 服务终端 <span class="badge" id="svc-badge">…</span></div>
+          <div class="dim small" id="term-count">0 行</div>
+        </div>
+        <div class="panel-sub">
+          <span class="svc-chip sm" id="svc-chip2"><span class="dot"></span><span id="svc-chip2-text">…</span></span>
+          <span class="dim small" id="ws-label"></span>
+          <span class="spacer"></span>
+          <button class="btn sm" id="btn-refresh-status">刷新状态</button>
+        </div>
+        <div class="console-body">
+          <div id="filetree" class="filetree"></div>
+          <div id="terminal" class="terminal"></div>
+        </div>
+        <div class="console-actions">
+          <button class="btn" id="btn-svc-start">▶ 启动服务</button>
+          <button class="btn" id="btn-svc-stop">■ 停止服务</button>
+          <button class="btn primary" id="btn-open-ms">🚀 打开 Material Studio</button>
+        </div>
+      </section>
+
+      <!-- ============ 视图 2：对话工作台（Harness 平台） ============ -->
+      <section id="view-harness" class="view hidden">
+        <div id="harness-top">
+          <div class="chip" id="chip-model">未配置模型</div>
+          <div class="chip toggle" id="chip-keeper" title="作业看护开关">看护：…</div>
+          <div class="chip" id="chip-tier-label" title="到模型配置页可改默认档">档位：完全自动</div>
+          <span class="spacer"></span>
+          <select id="tier" title="权限档位">
+            <option value="auto">完全自动</option>
+            <option value="confirm">需确认</option>
+            <option value="readonly">只读</option>
+          </select>
+        </div>
+
+        <div id="chat">
+          <div id="welcome" class="welcome">
+            <h1>MS Harness 工作台</h1>
+            <p>用自然语言下达 Materials Studio 建模与计算指令。</p>
+            <p class="dim small">未配置模型？回控制台「模型配置」填写；作业完成后看护会自动唤醒 AI 解析。</p>
+          </div>
+        </div>
+
+        <div id="composer">
+          <div id="composer-row">
+            <span id="timer" class="dim small"></span>
+            <span class="spacer"></span>
+            <button id="btn-stop" class="btn danger hidden">■ 停止</button>
+            <button id="btn-send" class="btn primary">发送 ↑</button>
+          </div>
+          <textarea id="input" rows="3" placeholder="给 AI 发消息或下达 Materials Studio 指令…（Enter 发送，Shift+Enter 换行）"></textarea>
+        </div>
+      </section>
+
+      <!-- ============ 视图 3：模型配置 ============ -->
+      <section id="view-modelcfg" class="view hidden">
+        <div class="cfg-page">
+          <h2>⚙ 模型接入</h2>
+          <label>协议
+            <select id="f-protocol">
+              <option value="anthropic">Anthropic 兼容（/v1/messages）</option>
+              <option value="openai">OpenAI 兼容（/chat/completions）</option>
+            </select>
+          </label>
+          <label>API Base
+            <input id="f-base" placeholder="如 https://open.bigmodel.cn/api/anthropic 或 http://127.0.0.1:3425" spellcheck="false" />
+          </label>
+          <label>API Key
+            <input id="f-key" type="password" placeholder="sk-…" spellcheck="false" />
+          </label>
+          <label>模型名
+            <input id="f-model" placeholder="如 GLM-5.3-Flash / claude-sonnet-4-5" spellcheck="false" />
+          </label>
+          <label>max_tokens（Anthropic 协议需要）
+            <input id="f-maxtok" type="number" value="8192" min="512" max="65536" />
+          </label>
+          <label class="chk"><input id="f-keeper" type="checkbox" /> 作业看护（自动轮询作业并在完成时唤醒 AI 解析）</label>
+          <div id="test-result" class="test-result hidden"></div>
+          <div class="dialog-row">
+            <button id="btn-test" class="btn">测试连接</button>
+            <span class="spacer"></span>
+            <button id="btn-save-cfg" class="btn primary">保存</button>
+          </div>
+          <p class="dim small">密钥明文保存在 ms-harness/config.json，仅本机使用，不上传。</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 底部状态栏 -->
+  <footer id="statusbar">
+    <span id="sb-view">console</span>
+    <span class="sep">|</span>
+    <span id="sb-svc">服务检测中</span>
+    <span class="sep">|</span>
+    <span id="sb-ms">MS: 未检测</span>
+    <span class="sep">|</span>
+    <span id="sb-ws" class="dim small"></span>
+    <span class="spacer"></span>
+    <span class="dim small">MS Harness · 正式版</span>
+  </footer>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

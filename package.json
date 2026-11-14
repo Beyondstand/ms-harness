@@ -1,0 +1,15 @@
+{
+  "name": "ms-harness",
+  "productName": "MS Harness",
+  "version": "1.0.0",
+  "description": "Materials Studio 的 AI Harness 启动器：接入模型 API，驱动 ms-mcp 桥完成建模计算任务",
+  "type": "module",
+  "main": "main.mjs",
+  "scripts": {
+    "start": "electron .",
+    "smoke": "node test/smoke.mjs"
+  },
+  "devDependencies": {
+    "electron": "^45.3.2"
+  }
+}
