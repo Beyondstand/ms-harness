@@ -90,10 +90,10 @@
 "matstudio": {
   "type": "stdio",
   "command": "C:\\Program Files\\nodejs\\node.exe",
-  "args": ["C:\\Users\\lenovo20200825\\.zcode\\workspace\\default\\ms-mcp\\server.mjs"],
-  "cwd": "C:\\Users\\lenovo20200825\\.zcode\\workspace\\default\\ms-mcp",
+  "args": ["C:\\Users\\<你的用户名>\\.zcode\\workspace\\default\\ms-mcp\\server.mjs"],
+  "cwd": "C:\\Users\\<你的用户名>\\.zcode\\workspace\\default\\ms-mcp",
   "env": {
-    "MS_MCP_WORKSPACE": "C:\\Users\\lenovo20200825\\.zcode\\workspace\\default\\ms-mcp\\workspace",
+    "MS_MCP_WORKSPACE": "C:\\Users\\<你的用户名>\\.zcode\\workspace\\default\\ms-mcp\\workspace",
     "MS_INSTALL_ROOT": "C:\\Program Files (x86)\\BIOVIA\\Materials Studio 23.1",
     "MS_SERVER_ROOT": "C:\\Program Files (x86)\\BIOVIA\\Materials Studio 23.1 x64 Server"
   },

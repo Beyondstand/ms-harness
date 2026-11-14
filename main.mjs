@@ -3,6 +3,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import { spawn, execFile } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import util from "node:util";
 import { fileURLToPath } from "node:url";
@@ -20,7 +21,7 @@ const CONFIG_PATH = path.join(APP_DIR, "config.json");
 const SESSIONS_DIR = path.join(APP_DIR, "sessions");
 
 // 桥与工作区默认路径：优先本机既有 ms-mcp 目录（保持既有任务工作区），否则用仓库自带 bridge/（自包含克隆可用）
-const PERSONAL_MS_MCP = "C:\\Users\\lenovo20200825\\.zcode\\workspace\\default\\ms-mcp";
+const PERSONAL_MS_MCP = path.join(os.homedir(), ".zcode", "workspace", "default", "ms-mcp");
 const DEFAULT_SERVER_PATH = fs.existsSync(path.join(PERSONAL_MS_MCP, "server.mjs"))
   ? path.join(PERSONAL_MS_MCP, "server.mjs")
   : path.join(APP_DIR, "bridge", "server.mjs");

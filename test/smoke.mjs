@@ -1,6 +1,7 @@
 // ms-harness 无 GUI 冒烟：协议映射 / 宿主工具安全 / MCP 客户端连真桥 / 假作业看护
 // 运行：node test/smoke.mjs
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import assert from "node:assert";
 import { McpClient } from "../mcpClient.mjs";
@@ -8,10 +9,17 @@ import { JobKeeper } from "../jobkeeper.mjs";
 import { wsToolCall, resolveInWorkspace } from "../wsTools.mjs";
 import { buildAnthropicMessages, buildOpenAIMessages, apiUrl } from "../agent.mjs";
 
+// 与 main.mjs 同一自适应逻辑：本机既有 ms-mcp 优先，否则仓库自带 bridge/
+const LOCAL_MS_MCP = path.join(os.homedir(), ".zcode", "workspace", "default", "ms-mcp");
+const REPO_ROOT = path.dirname(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")));
 const MS = {
   nodePath: "C:\\Program Files\\nodejs\\node.exe",
-  serverPath: "C:\\Users\\lenovo20200825\\.zcode\\workspace\\default\\ms-mcp\\server.mjs",
-  workspace: "C:\\Users\\lenovo20200825\\.zcode\\workspace\\default\\ms-mcp\\workspace",
+  serverPath: fs.existsSync(path.join(LOCAL_MS_MCP, "server.mjs"))
+    ? path.join(LOCAL_MS_MCP, "server.mjs")
+    : path.join(REPO_ROOT, "bridge", "server.mjs"),
+  workspace: fs.existsSync(LOCAL_MS_MCP)
+    ? path.join(LOCAL_MS_MCP, "workspace")
+    : path.join(REPO_ROOT, "bridge", "workspace"),
   installRoot: "C:\\Program Files (x86)\\BIOVIA\\Materials Studio 23.1",
   serverRoot: "C:\\Program Files (x86)\\BIOVIA\\Materials Studio 23.1 x64 Server",
 };
