@@ -44,6 +44,21 @@ export const WS_TOOLS = [
       additionalProperties: false,
     },
   },
+  {
+    name: "ws_fetch_file",
+    description:
+      "从开放数据库/公开 URL 下载文件到工作区（取材三分支第 2 支：COD、Materials Project 公开条目、官方示例等）。仅 http/https 直链；下载到本地后只读本地文件，之后不再访问远端。执行类操作，需确认档位下会弹确认卡。",
+    inputSchema: {
+      type: "object",
+      properties: {
+        url: { type: "string", description: "http/https 文件直链" },
+        path: { type: "string", description: "保存到工作区的相对路径（含文件名）" },
+        maxMB: { type: "integer", description: "大小上限 MB，默认 100" },
+      },
+      required: ["url", "path"],
+      additionalProperties: false,
+    },
+  },
 ];
 
 export function resolveInWorkspace(workspaceRoot, relOrAbs) {
@@ -69,6 +84,29 @@ export async function wsToolCall(workspaceRoot, name, args = {}) {
     fs.mkdirSync(path.dirname(abs), { recursive: true });
     fs.writeFileSync(abs, content, "utf8");
     const out = { path: abs, bytes: Buffer.byteLength(content, "utf8") };
+    return { isError: false, text: JSON.stringify(out, null, 2), structured: out };
+  }
+  if (name === "ws_fetch_file") {
+    const abs = resolveInWorkspace(workspaceRoot, args.path);
+    const ext = path.extname(abs).toLowerCase();
+    if (BLOCKED_EXT.has(ext)) {
+      throw new Error(`禁止保存可执行类型 ${ext}`);
+    }
+    let u;
+    try { u = new URL(String(args.url || "")); } catch { throw new Error("URL 无法解析"); }
+    if (!/^https?:$/.test(u.protocol)) {
+      throw new Error("仅允许 http/https 链接");
+    }
+    const maxBytes = (Number(args.maxMB) || 100) * 1024 * 1024;
+    const res = await fetch(u, { signal: AbortSignal.timeout(120000), redirect: "follow" });
+    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    const len = Number(res.headers.get("content-length") || 0);
+    if (len > maxBytes) throw new Error(`文件过大（Content-Length ${len} > 上限 ${maxBytes}）`);
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length > maxBytes) throw new Error(`下载超出大小上限：${buf.length} 字节`);
+    fs.mkdirSync(path.dirname(abs), { recursive: true });
+    fs.writeFileSync(abs, buf);
+    const out = { path: abs, bytes: buf.length, url: u.href };
     return { isError: false, text: JSON.stringify(out, null, 2), structured: out };
   }
   if (name === "ws_list_dirs") {

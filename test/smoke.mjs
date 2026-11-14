@@ -77,6 +77,21 @@ function ok(name) {
   assert.ok(r2.structured.dirs.includes("harness-smoke-scratch"));
   ok("ws_list_dirs 列目录");
   fs.rmSync(scratch, { recursive: true, force: true });
+
+  // ws_fetch_file 安全检查（不联网，只测拦截）
+  await assert.rejects(
+    () => wsToolCall(MS.workspace, "ws_fetch_file", { url: "file:///C:/Windows/notepad.exe", path: "harness-smoke-scratch/x.txt" }),
+    /仅允许 http\/https/
+  );
+  await assert.rejects(
+    () => wsToolCall(MS.workspace, "ws_fetch_file", { url: "不是URL", path: "harness-smoke-scratch/x.txt" }),
+    /URL 无法解析/
+  );
+  await assert.rejects(
+    () => wsToolCall(MS.workspace, "ws_fetch_file", { url: "https://example.com/a.exe", path: "harness-smoke-scratch/a.exe" }),
+    /禁止保存可执行/
+  );
+  ok("ws_fetch_file 拦截 file:// 与可执行类型");
 }
 
 // ---------- 3. MCP 客户端连真桥 ----------
