@@ -364,3 +364,65 @@ body {
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: #2b303a; border-radius: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* ============ 置顶使用说明卡 ============ */
+.guide {
+  margin: 10px 2px 0;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.guide-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #7fb2ff;
+  cursor: pointer;
+  user-select: none;
+  background: var(--accent-soft);
+}
+.guide-head:hover { color: #a8c9ff; }
+.guide-body { padding: 8px 10px 10px; }
+.guide-steps {
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--dim);
+  padding: 6px 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.guide-steps b { color: var(--text); }
+.guide-sub {
+  font-size: 11px;
+  color: var(--dim);
+  margin: 8px 2px 4px;
+  letter-spacing: 0.5px;
+}
+.guide-cases {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.case-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.case-row:hover { background: var(--panel); }
+.case-row .ic { flex-shrink: 0; }
+.case-row .ct { color: var(--text); }
+.case-row .cd { color: var(--dim); }
+.case-row:hover .cd { color: var(--text); }

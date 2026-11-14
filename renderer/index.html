@@ -34,11 +34,24 @@
       <div class="sec">系统</div>
       <div class="nav" data-view="modelcfg">⚙ 模型配置</div>
 
-      <div class="sec">会话</div>
-      <div id="sessions" class="list"></div>
+      <div id="guide" class="guide">
+        <div class="guide-head" id="guide-toggle">📌 使用说明 · 置顶 <span id="guide-caret">▾</span></div>
+        <div id="guide-body">
+          <div class="guide-steps">
+            ① <b>模型配置</b>页填 API 并「测试连接」<br>
+            ② 控制台点「打开 Material Studio」→ 检测到启动自动跳转本工作台<br>
+            ③ 点击下方案例或直接输入指令；长作业由看护自动唤醒收尾
+          </div>
+          <div class="guide-sub">AI 能替你做（点击填入输入框）</div>
+          <div id="guide-cases" class="guide-cases"></div>
+        </div>
+      </div>
 
-      <div class="sec">任务目录</div>
-      <div id="taskdirs" class="list"></div>
+      <div class="sec honly">历史工作记录</div>
+      <div id="sessions" class="list honly"></div>
+
+      <div class="sec honly">任务目录</div>
+      <div id="taskdirs" class="list honly"></div>
 
       <div class="spacer"></div>
       <div class="filterbox"><input id="term-filter" placeholder="过滤日志…" spellcheck="false" /></div>

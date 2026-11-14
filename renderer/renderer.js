@@ -52,6 +52,74 @@ function md(text) {
 function scrollBottom() { const c = $("chat"); c.scrollTop = c.scrollHeight; }
 function clearWelcome() { const w = $("welcome"); if (w) w.remove(); }
 
+// ---------- 置顶使用说明：AI 能力案例 ----------
+const CASES = [
+  {
+    ic: "🔍", t: "环境体检",
+    d: "分层检查 L1–L4，红灯给修复建议",
+    p: "检查 MS 环境：跑 ms_status 分层检查，汇报 L1–L4 各层状态；有红灯给出修复建议。",
+  },
+  {
+    ic: "🧱", t: "搭建结构",
+    d: "写脚本建晶体/分子，存 .xsd",
+    p: "在任务目录里写 MaterialsScript 脚本搭建【结构：如金刚石晶体 / 水分子】，几何优化后保存 .xsd，告诉我文件路径。",
+  },
+  {
+    ic: "⚡", t: "单点能与几何优化",
+    d: "CASTEP 计算，pilot 试点先行",
+    p: "用 CASTEP 对【结构文件】做几何优化：先建任务目录写 .pl 脚本，跑一个 pilot 单点核验设置无误后再正式计算，汇报能量与收敛情况。",
+  },
+  {
+    ic: "📊", t: "参数扫描",
+    d: "截断能/k点扫描 + 严格对比",
+    p: "对【结构】做截断能扫描（400/450/500/550 eV）：pilot-first，每个截断跑完用 ms_parse_castep 严格核验，最后给能量-截断表和推荐值。",
+  },
+  {
+    ic: "📖", t: "结果解析汇报",
+    d: "核验收敛、提取能量与设置",
+    p: "解析任务目录【目录名】里的 .castep：核验 SCF 收敛，给出 E0 能量/截断/k 点/展宽，invalid 的剔除并说明原因。",
+  },
+  {
+    ic: "⚖️", t: "两结构能量差",
+    d: "形成能/吸附能（标签一致性检查）",
+    p: "对比【host.castep】与【modified.castep】：用 ms_parse_castep 确认能量标签一致后给出 ΔE（eV），并判断两者是否都收敛。",
+  },
+  {
+    ic: "⏱️", t: "长作业托管",
+    d: "异步提交，看护自动唤醒解析",
+    p: "把【计算任务】用 ms_submit_job 提交为异步作业并告诉我预计时长；作业完成后看护会自动叫你解析汇报。",
+  },
+  {
+    ic: "🧹", t: "批量产物巡检",
+    d: "汇总全部任务目录的收敛与能量",
+    p: "扫描工作区所有任务目录的 .castep 文件，汇总每个的收敛状态与主能量，生成一张总表；invalid 的单独列出。",
+  },
+];
+
+function renderGuideCases() {
+  $("guide-cases").innerHTML = CASES.map(
+    (c, i) =>
+      `<div class="case-row" data-case="${i}" title="${esc(c.p)}">` +
+      `<span class="ic">${c.ic}</span><span class="ct">${esc(c.t)}</span>` +
+      `<span class="cd">— ${esc(c.d)}</span></div>`
+  ).join("");
+}
+
+$("guide-cases").addEventListener("click", (e) => {
+  const row = e.target.closest("[data-case]");
+  if (!row) return;
+  const c = CASES[Number(row.dataset.case)];
+  $("input").value = c.p;
+  showView("harness");
+  $("input").focus();
+});
+
+$("guide-toggle").addEventListener("click", () => {
+  const body = $("guide-body");
+  const collapsed = body.classList.toggle("hidden");
+  $("guide-caret").textContent = collapsed ? "▸" : "▾";
+});
+
 // ---------- 视图切换 ----------
 const VIEW_NAMES = { console: "console", harness: "harness", modelcfg: "modelcfg" };
 
@@ -60,10 +128,11 @@ function showView(name) {
   for (const v of ["console", "harness", "modelcfg"]) {
     $(`view-${v}`).classList.toggle("hidden", v !== name);
   }
+  // 工作台专属侧栏内容：置顶说明 / 历史工作记录 / 任务目录
+  document.querySelectorAll(".honly").forEach((el) => el.classList.toggle("hidden", name !== "harness"));
   document.querySelectorAll(".nav").forEach((n) => n.classList.toggle("active", n.dataset.view === name));
   $("tb-view").textContent = VIEW_NAMES[name] || name;
   $("sb-view").textContent = VIEW_NAMES[name] || name;
-  // 标题栏右侧动作按钮：工作台里是"返回控制台"，其余是"打开 Material Studio"
   if (name === "harness") {
     $("tb-action").textContent = "◀ 返回控制台";
   } else {
@@ -536,6 +605,7 @@ window.harness.onEvent((ev) => {
   refreshSessions();
   refreshDirs();
   refreshTree();
+  renderGuideCases();
   loadCfgForm();
   updateChips();
   showView("console");
